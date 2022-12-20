@@ -1,6 +1,7 @@
 import pandas as pd
 import statsmodels.api as sm
 
+#Function for executing the statsmodels.api linregress function
 def linregress(positions, y_vars, X_vars, model_start_date, oosdate):
     #split data into insample and out of sample data sets
     oos_data = positions.loc[(positions['Date']<=oosdate) & (positions['Date'] >= model_start_date)]
