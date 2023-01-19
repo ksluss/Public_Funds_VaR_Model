@@ -1,16 +1,24 @@
 #%%Import basic stuff
 import run_model as rm
-import RiskTools as rt
+from RiskTools import useful_functions as rt
 import numpy as np
 from numpy.linalg import eig
 import pandas as pd
 import statsmodels.api as sm
 import matplotlib.pyplot as plt
 from datetime import datetime
+import Market_Data as mkt
+
 
 #Dates on which you want to start and end your data set
 datastartdate = '20180101'
 dataenddate = '20220930'
+
+
+startdate = datetime.strptime(datastartdate,'%Y%m%d')
+enddate = datetime.strptime(dataenddate,'%Y%m%d')
+
+
 
 #cutoff date for the out of sample period
 oosdate = '20220731'
@@ -72,17 +80,15 @@ positions = pos.copy()
 positions.head(5)
 
 #%%Read in market data
-chunksize = 10 ** 6
-mktdata = pd.DataFrame()
-with pd.read_csv(datafldr + mktDataFile, chunksize=chunksize) as reader:
-    for chunk in reader:
-        mktdata = pd.concat([mktdata, chunk])
-mktdata.columns = mktdata.columns.str.lower()
-mktdata.sort_values("date",ascending=False, inplace=True)
+mktdata = mkt.PullHistoricalMarketData(startdate, enddate)
+diff = mkt.calcmktdatachngs(mktdata, dates)
 
-print(mktdata.head(2))
+mktdata.head(3)
+diff.head(3)
 
-#%%  Filter market data to days where we have position data
+#%%
+positions['portfolioid'] = positions['portfolioid'].astype('str')
+pos = positions.groupby(['date','portfolioid']).agg({'marketvalue' : 'sum'}).reset_index()
+portfolio = '190132'
 
-#filter the market data and calculate differences
-mktdata = mktdata.loc[mktdata['date'].isin(dates)]
+pos.loc[pos['portfolioid']==portfolio]
